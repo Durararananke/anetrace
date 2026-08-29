@@ -61,21 +61,4 @@ scripts/build_vitaldb_cases.py  Reproducible VitalDB data generator
 public/sw.js                    Basic offline cache
 ```
 
-## Quality checks
-
-```bash
-npm run lint
-npm test
-npm run build
-```
-
-## Publish to GitHub
-
-This repository intentionally has no remote configured. Create an empty GitHub repository, then run:
-
-```bash
-git remote add origin https://github.com/<account>/<repository>.git
-git push -u origin main
-```
-
 Read [CONTRIBUTING.md](CONTRIBUTING.md) before contributing. Source code is available under the [MIT License](LICENSE).
