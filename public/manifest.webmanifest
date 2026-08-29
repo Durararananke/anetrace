@@ -1,0 +1,16 @@
+{
+  "name": "AneTrace · 术中病例回放实验室",
+  "short_name": "AneTrace",
+  "description": "开放的麻醉监护病例回放与教学标注工具",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0b1116",
+  "theme_color": "#0b1116",
+  "icons": [
+    {
+      "src": "/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml"
+    }
+  ]
+}
