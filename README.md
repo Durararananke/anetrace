@@ -61,10 +61,6 @@ scripts/build_vitaldb_cases.py  Reproducible VitalDB data generator
 public/sw.js                    Basic offline cache
 ```
 
-## Visual language
-
-The paper-and-ink surfaces, signal-yellow accent, square geometry, and light/dark semantic palette are inspired by the design language documented in [dsh-theme-endfield](https://github.com/ymh0000123/dsh-theme-endfield). No theme plugin code is bundled into AneTrace.
-
 ## Quality checks
 
 ```bash
