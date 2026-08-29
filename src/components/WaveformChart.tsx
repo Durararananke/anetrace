@@ -61,12 +61,12 @@ export function WaveformChart({
         className="waveform-chart"
         viewBox={`0 0 ${WIDTH} ${height}`}
         role="img"
-        aria-label={`${caseData.title} 多参数监护趋势图`}
+        aria-label={`${caseData.title} multi-parameter monitoring trend`}
         onPointerDown={(event) => handlePointer(event.clientX)}
       >
         <defs>
           <pattern id={patternId} width="9" height="9" patternUnits="userSpaceOnUse">
-            <path d="M-2 2L2-2M0 9L9 0M7 11L11 7" stroke="#24313a" strokeWidth="1" />
+            <path d="M-2 2L2-2M0 9L9 0M7 11L11 7" stroke="var(--line)" strokeWidth="1" />
           </pattern>
           <clipPath id={`${patternId}-visible`}>
             <rect
@@ -78,8 +78,8 @@ export function WaveformChart({
           </clipPath>
         </defs>
 
-        <rect width={WIDTH} height={height} fill="#0d151b" />
-        <rect x={LABEL_WIDTH} y={TOP} width={plotWidth} height={height - TOP - 28} fill="#0a1015" />
+        <rect width={WIDTH} height={height} fill="var(--panel)" />
+        <rect x={LABEL_WIDTH} y={TOP} width={plotWidth} height={height - TOP - 28} fill="var(--chart-bg)" />
 
         {Array.from({ length: 9 }, (_, index) => {
           const x = LABEL_WIDTH + (index / 8) * plotWidth

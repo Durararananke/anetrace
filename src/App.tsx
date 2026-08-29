@@ -1,4 +1,4 @@
-import { Activity, BadgeInfo, BookOpenCheck, ExternalLink, Menu, ShieldCheck, X } from "lucide-react"
+import { Activity, BadgeInfo, BookOpenCheck, ExternalLink, Menu, Moon, ShieldCheck, Sun, X } from "lucide-react"
 import { useEffect, useMemo, useState } from "react"
 import { CaseLibrary } from "./components/CaseLibrary"
 import { CheckpointDialog } from "./components/CheckpointDialog"
@@ -16,6 +16,17 @@ interface ToastState {
   tone: "default" | "danger"
 }
 
+type ThemeMode = "light" | "dark"
+const THEME_STORAGE_KEY = "anetrace.theme.v1"
+
+function initialTheme(): ThemeMode {
+  const stored = localStorage.getItem(THEME_STORAGE_KEY)
+  if (stored === "light" || stored === "dark") return stored
+  return typeof window.matchMedia === "function" && window.matchMedia("(prefers-color-scheme: light)").matches
+    ? "light"
+    : "dark"
+}
+
 export default function App() {
   const [bundle, setBundle] = useState<CaseBundle | null>(null)
   const [loadError, setLoadError] = useState<string | null>(null)
@@ -31,6 +42,7 @@ export default function App() {
   const [aboutOpen, setAboutOpen] = useState(false)
   const [mobileLibraryOpen, setMobileLibraryOpen] = useState(false)
   const [toast, setToast] = useState<ToastState | null>(null)
+  const [theme, setTheme] = useState<ThemeMode>(initialTheme)
 
   useEffect(() => {
     const controller = new AbortController()
@@ -41,12 +53,20 @@ export default function App() {
       })
       .catch((error: unknown) => {
         if (error instanceof DOMException && error.name === "AbortError") return
-        setLoadError(error instanceof Error ? error.message : "病例数据加载失败")
+        setLoadError(error instanceof Error ? error.message : "Case data failed to load")
       })
     return () => controller.abort()
   }, [])
 
   useEffect(() => saveNotes(notes), [notes])
+
+  useEffect(() => {
+    document.documentElement.dataset.theme = theme
+    document.body.dataset.theme = theme
+    document.documentElement.style.colorScheme = theme
+    document.querySelector('meta[name="theme-color"]')?.setAttribute("content", theme === "dark" ? "#101110" : "#e8e8e2")
+    localStorage.setItem(THEME_STORAGE_KEY, theme)
+  }, [theme])
 
   useEffect(() => {
     if (!toast) return
@@ -104,8 +124,8 @@ export default function App() {
   if (loadError) {
     return (
       <main className="system-state error-state">
-        <Activity size={34} /><span>DATA LINK FAILED</span><h1>病例数据未能加载</h1><p>{loadError}</p>
-        <button className="primary-button" onClick={() => window.location.reload()}>重新加载</button>
+        <Activity size={34} /><span>DATA LINK FAILED</span><h1>Case data could not be loaded</h1><p>{loadError}</p>
+        <button className="primary-button" onClick={() => window.location.reload()}>Reload</button>
       </main>
     )
   }
@@ -116,29 +136,32 @@ export default function App() {
 
   const currentNotes = notes.filter((note) => note.caseId === currentCase.id)
   const signalCount = bundle.cases.reduce((count, caseData) => count + Object.keys(caseData.tracks).length, 0)
-  const anesthesiaLabel = currentCase.procedure.anesthesia === "General"
-    ? "全身麻醉"
-    : `${currentCase.procedure.anesthesia} 麻醉`
+  const anesthesiaLabel = currentCase.procedure.anesthesia === "Not provided"
+    ? currentCase.procedure.anesthesia
+    : `${currentCase.procedure.anesthesia} anesthesia`
 
   return (
     <div className="app-shell">
       <header className="topbar">
         <div className="brand-lockup">
-          <button className="mobile-menu-button" aria-label="打开病例库" onClick={() => setMobileLibraryOpen(true)}><Menu size={19} /></button>
+          <button className="mobile-menu-button" aria-label="Open case library" onClick={() => setMobileLibraryOpen(true)}><Menu size={19} /></button>
           <div className="brand-pulse" aria-hidden="true"><span /></div>
           <div><strong>ANETRACE</strong><span>INTRAOPERATIVE CASE LAB</span></div>
         </div>
         <div className="topbar-center"><span className="system-live"><i /> DATASET ONLINE</span><span>{bundle.cases.length} CASES / {signalCount} SIGNALS</span></div>
         <div className="topbar-actions">
-          <button className="text-button" onClick={() => setAboutOpen(true)}><BadgeInfo size={16} /> 数据与安全</button>
+          <button className="icon-button theme-toggle" aria-label={`Switch to ${theme === "dark" ? "light" : "dark"} theme`} onClick={() => setTheme(theme === "dark" ? "light" : "dark")}>
+            {theme === "dark" ? <Sun size={17} /> : <Moon size={17} />}
+          </button>
+          <button className="text-button" onClick={() => setAboutOpen(true)}><BadgeInfo size={16} /> Data &amp; safety</button>
         </div>
       </header>
 
       <div className="workspace-grid">
         <div className={`mobile-library-backdrop ${mobileLibraryOpen ? "is-open" : ""}`}>
-          <button aria-label="关闭病例库" onClick={() => setMobileLibraryOpen(false)} />
+          <button aria-label="Close case library" onClick={() => setMobileLibraryOpen(false)} />
           <div className="mobile-library-sheet">
-            <button className="mobile-close" aria-label="关闭" onClick={() => setMobileLibraryOpen(false)}><X size={18} /></button>
+            <button className="mobile-close" aria-label="Close" onClick={() => setMobileLibraryOpen(false)}><X size={18} /></button>
             <CaseLibrary cases={bundle.cases} selectedId={currentCase.id} onSelect={selectCase} />
           </div>
         </div>
@@ -176,10 +199,10 @@ export default function App() {
           </section>
 
           <section className="case-facts">
-            <div className="fact-block"><span>科室</span><strong>{currentCase.procedure.department}</strong></div>
-            <div className="fact-block"><span>手术类别</span><strong>{currentCase.procedure.type}</strong></div>
-            <div className="fact-block"><span>入路</span><strong>{currentCase.procedure.approach}</strong></div>
-            <div className="fact-block fact-wide"><span>数据来源</span><strong>{currentCase.provenance.dataset}</strong><a href={currentCase.provenance.url} target="_blank" rel="noreferrer">{currentCase.provenance.license} <ExternalLink size={12} /></a></div>
+            <div className="fact-block"><span>DEPARTMENT</span><strong>{currentCase.procedure.department}</strong></div>
+            <div className="fact-block"><span>PROCEDURE TYPE</span><strong>{currentCase.procedure.type}</strong></div>
+            <div className="fact-block"><span>APPROACH</span><strong>{currentCase.procedure.approach}</strong></div>
+            <div className="fact-block fact-wide"><span>DATA SOURCE</span><strong>{currentCase.provenance.dataset}</strong><a href={currentCase.provenance.url} target="_blank" rel="noreferrer">{currentCase.provenance.license} <ExternalLink size={12} /></a></div>
           </section>
         </main>
 
@@ -192,12 +215,12 @@ export default function App() {
       {aboutOpen && (
         <div className="dialog-backdrop" role="presentation">
           <section className="about-dialog" role="dialog" aria-modal="true" aria-labelledby="about-title">
-            <button className="dialog-close" aria-label="关闭" onClick={() => setAboutOpen(false)}><X size={18} /></button>
+            <button className="dialog-close" aria-label="Close" onClick={() => setAboutOpen(false)}><X size={18} /></button>
             <BookOpenCheck size={30} className="about-icon" /><span className="dialog-kicker">DATA PROVENANCE / SAFETY</span>
-            <h2 id="about-title">真实信号，教学边界。</h2>
-            <p>演示病例来自 VitalDB v1.0.0 公开匿名数据集。程序仅回放和描述监护趋势，不生成诊断、风险预测、给药剂量或处置建议。</p>
-            <ul><li>病例数据经过10秒降采样，不能用于实时监护。</li><li>自动生成的问题均标记为待麻醉专业人员审核。</li><li>个人标注仅保存在当前浏览器，可手动导出。</li></ul>
-            <a className="primary-button link-button" href="https://physionet.org/content/vitaldb/1.0.0/" target="_blank" rel="noreferrer">查看 VitalDB 数据说明 <ExternalLink size={14} /></a>
+            <h2 id="about-title">Real signals. Clear teaching boundaries.</h2>
+            <p>Demonstration cases come from the public, de-identified VitalDB v1.0.0 dataset. AneTrace replays and describes monitored trends only; it does not generate diagnoses, risk predictions, drug doses, or treatment advice.</p>
+            <ul><li>Case data is resampled at 10-second intervals and cannot be used for real-time monitoring.</li><li>Every generated question remains marked for anesthesia specialist review.</li><li>Personal annotations stay in this browser unless you export them.</li></ul>
+            <a className="primary-button link-button" href="https://physionet.org/content/vitaldb/1.0.0/" target="_blank" rel="noreferrer">View the VitalDB data description <ExternalLink size={14} /></a>
           </section>
         </div>
       )}

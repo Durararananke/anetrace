@@ -1,4 +1,4 @@
-const CACHE_NAME = "anetrace-v1"
+const CACHE_NAME = "anetrace-v2"
 const BASE_URL = new URL("./", self.registration.scope).pathname
 const CORE_ASSETS = [BASE_URL, `${BASE_URL}cases/cases.json`, `${BASE_URL}manifest.webmanifest`, `${BASE_URL}icon.svg`]
 

@@ -16,12 +16,12 @@ export function CheckpointDialog({ checkpoint, onClose }: CheckpointDialogProps)
     <div className="dialog-backdrop" role="presentation">
       <section className="checkpoint-dialog" role="dialog" aria-modal="true" aria-labelledby="question-title">
         <div className="dialog-kicker">
-          <span>趋势检查点</span>
+          <span>Trend checkpoint</span>
           <span className="review-chip">
-            <CircleAlert size={13} /> 待专家审核
+            <CircleAlert size={13} /> Expert review required
           </span>
         </div>
-        <h2 id="question-title">先读曲线，再看答案。</h2>
+        <h2 id="question-title">Read the trace before revealing the answer.</h2>
         <p className="question-copy">{checkpoint.prompt}</p>
 
         <div className="answer-grid">
@@ -47,15 +47,15 @@ export function CheckpointDialog({ checkpoint, onClose }: CheckpointDialogProps)
 
         {answer && (
           <div className={`answer-explanation ${isCorrect ? "correct" : "incorrect"}`}>
-            <strong>{isCorrect ? "判断一致" : "再看一次基线与当前窗口"}</strong>
+            <strong>{isCorrect ? "Pattern identified" : "Compare the baseline and current window again"}</strong>
             <p>{checkpoint.explanation}</p>
           </div>
         )}
 
         <div className="dialog-actions">
-          <p>本题仅用于观察训练，不构成临床判断。</p>
+          <p>This exercise trains observation only and is not a clinical judgment.</p>
           <button className="primary-button" onClick={onClose} disabled={!answer}>
-            返回回放
+            Return to replay
           </button>
         </div>
       </section>

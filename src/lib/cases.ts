@@ -3,11 +3,11 @@ import type { CaseBundle, VitalCase } from "../types"
 export async function loadCaseBundle(signal?: AbortSignal): Promise<CaseBundle> {
   const response = await fetch(`${import.meta.env.BASE_URL}cases/cases.json`, { signal })
   if (!response.ok) {
-    throw new Error(`病例数据加载失败（HTTP ${response.status}）`)
+    throw new Error(`Case data request failed (HTTP ${response.status})`)
   }
   const value = (await response.json()) as unknown
   if (!isCaseBundle(value)) {
-    throw new Error("病例数据格式无效")
+    throw new Error("The case bundle has an invalid format")
   }
   return value
 }

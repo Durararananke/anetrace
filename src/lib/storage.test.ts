@@ -7,7 +7,7 @@ const note: TeachingNote = {
   caseId: "case-1",
   time: 120,
   category: "observation",
-  text: "观察血压趋势",
+  text: "Observe the blood pressure trend",
   createdAt: "2026-08-29T00:00:00Z",
 }
 
@@ -21,7 +21,7 @@ describe("teaching-note persistence", () => {
   })
 
   it("rejects files from another application", () => {
-    expect(() => parseNotesFile('{"type":"unknown","notes":[]}')).toThrow("不是有效的 AneTrace 标注文件")
+    expect(() => parseNotesFile('{"type":"unknown","notes":[]}')).toThrow("This is not a valid AneTrace annotation file")
   })
 
   it("ignores malformed note entries", () => {

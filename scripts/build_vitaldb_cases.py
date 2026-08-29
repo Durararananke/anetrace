@@ -21,7 +21,7 @@ from typing import Any
 API_ROOT = "https://api.vitaldb.net"
 OUTPUT = Path(__file__).resolve().parents[1] / "public" / "cases" / "cases.json"
 SAMPLE_SECONDS = 10
-CASE_IDS = [1, 3, 5, 7, 10]
+CASE_IDS = [1, 2, 3, 5, 7, 8, 10, 12, 16, 41]
 
 TRACKS = {
     "hr": ("Solar8000/HR",),
@@ -42,21 +42,26 @@ RANGES = {
 }
 
 LABELS = {
-    "hr": "心率",
-    "map": "平均动脉压",
-    "spo2": "血氧饱和度",
-    "etco2": "呼气末二氧化碳",
+    "hr": "heart rate",
+    "map": "mean arterial pressure",
+    "spo2": "oxygen saturation",
+    "etco2": "end-tidal carbon dioxide",
     "bis": "BIS",
 }
 
 UNITS = {"hr": "bpm", "map": "mmHg", "spo2": "%", "etco2": "mmHg", "bis": ""}
 
 FOCUS = {
-    1: "长时程腹部手术中的多参数趋势",
-    3: "短时程腔镜手术的阶段变化",
-    5: "复杂血管手术的长时程观察",
-    7: "胸科手术中的呼吸与循环趋势",
-    10: "胃肠手术中的连续监护变化",
+    1: "Long-duration colorectal case with multi-parameter trends",
+    2: "Extended gastric surgery trace",
+    3: "Short laparoscopic biliary case",
+    5: "Long vascular surgery trace",
+    7: "Thoracic case with respiratory and circulatory trends",
+    8: "Short breast surgery trace",
+    10: "Extended gastric surgery trace",
+    12: "Prolonged transplant case with five monitored signals",
+    16: "Hepatic resection trend review",
+    41: "Urologic resection trend review",
 }
 
 
@@ -173,18 +178,18 @@ def build_checkpoints(series: dict[str, list[list[float | int]]], duration: int)
     keys = list(TRACKS)
     checkpoints = []
     for index, (_, time, answer, current, baseline) in enumerate(chosen, start=1):
-        direction = "升高" if current > baseline else "降低"
+        direction = "increase" if current > baseline else "decrease"
         checkpoints.append(
             {
                 "id": f"q-{index}",
                 "time": time,
-                "prompt": "与此前约五分钟的稳定水平相比，哪项监护参数的变化最突出？",
+                "prompt": "Compared with the preceding five-minute baseline, which monitored parameter changes most prominently?",
                 "options": [{"id": key, "label": LABELS[key]} for key in keys],
                 "answer": answer,
                 "explanation": (
-                    f"此时间窗内{LABELS[answer]}中位值约为 {current:.0f} {UNITS[answer]}，"
-                    f"此前基线约为 {baseline:.0f} {UNITS[answer]}，呈明显{direction}趋势。"
-                    "这里只描述数据变化，不代表诊断或处置建议。"
+                    f"The median {LABELS[answer]} in this window is approximately {current:.0f} {UNITS[answer]}, "
+                    f"compared with a preceding baseline of approximately {baseline:.0f} {UNITS[answer]}, "
+                    f"showing a clear {direction}. This describes a data trend only and is not a diagnosis or treatment recommendation."
                 ),
                 "reviewStatus": "needs-expert-review",
             }
@@ -195,7 +200,7 @@ def build_checkpoints(series: dict[str, list[list[float | int]]], duration: int)
 def age_band(raw_age: str) -> str:
     age = int(float(raw_age))
     lower = age // 10 * 10
-    return f"{lower}–{lower + 9} 岁"
+    return f"{lower}-{lower + 9} years"
 
 
 def build_case(meta: dict[str, str], available: list[TrackInfo]) -> dict[str, Any]:
@@ -217,7 +222,7 @@ def build_case(meta: dict[str, str], available: list[TrackInfo]) -> dict[str, An
             remaining.remove(track.name)
 
     events = []
-    for key, label in (("opstart", "手术开始"), ("opend", "手术结束")):
+    for key, label in (("opstart", "Procedure start"), ("opend", "Procedure end")):
         try:
             time = int(float(meta[key]))
         except (ValueError, TypeError):
@@ -228,19 +233,19 @@ def build_case(meta: dict[str, str], available: list[TrackInfo]) -> dict[str, An
     return {
         "id": f"vitaldb-{caseid}",
         "sourceCaseId": caseid,
-        "title": meta.get("opname") or f"VitalDB 病例 {caseid}",
+        "title": meta.get("opname") or f"VitalDB case {caseid}",
         "subtitle": FOCUS[caseid],
         "duration": duration,
         "patient": {
             "ageBand": age_band(meta["age"]),
-            "sex": "男性" if meta.get("sex") == "M" else "女性",
+            "sex": "Male" if meta.get("sex") == "M" else "Female",
             "asa": f"ASA {meta.get('asa') or '—'}",
         },
         "procedure": {
-            "department": meta.get("department") or "未提供",
-            "type": meta.get("optype") or "未提供",
-            "approach": meta.get("approach") or "未提供",
-            "anesthesia": meta.get("ane_type") or "未提供",
+            "department": meta.get("department") or "Not provided",
+            "type": meta.get("optype") or "Not provided",
+            "approach": meta.get("approach") or "Not provided",
+            "anesthesia": meta.get("ane_type") or "Not provided",
         },
         "tracks": series,
         "trackSources": sources,
@@ -260,9 +265,12 @@ def main() -> None:
     bundle = {
         "schemaVersion": 1,
         "generatedAt": "2026-08-29",
-        "disclaimer": "仅用于医学教育与软件演示，不用于临床诊断、监测或治疗决策。",
+        "disclaimer": "For medical education and software demonstration only. Not for clinical diagnosis, monitoring, or treatment decisions.",
         "cases": [build_case(cases[caseid], tracks[caseid]) for caseid in CASE_IDS],
     }
+    incomplete = [case["id"] for case in bundle["cases"] if set(case["tracks"]) != set(TRACKS)]
+    if incomplete:
+        raise RuntimeError(f"Cases missing one or more required tracks: {', '.join(incomplete)}")
     OUTPUT.parent.mkdir(parents=True, exist_ok=True)
     OUTPUT.write_text(json.dumps(bundle, ensure_ascii=False, separators=(",", ":")), encoding="utf-8")
     print(f"Wrote {len(bundle['cases'])} cases to {OUTPUT}")

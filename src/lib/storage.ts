@@ -22,7 +22,7 @@ export function exportNotes(notes: TeachingNote[]): string {
 export function parseNotesFile(content: string): TeachingNote[] {
   const parsed = JSON.parse(content) as { type?: string; notes?: unknown }
   if (parsed.type !== "anetrace-notes" || !Array.isArray(parsed.notes)) {
-    throw new Error("不是有效的 AneTrace 标注文件")
+    throw new Error("This is not a valid AneTrace annotation file")
   }
   return parsed.notes.filter(isTeachingNote)
 }

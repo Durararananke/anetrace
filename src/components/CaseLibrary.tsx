@@ -27,13 +27,13 @@ export function CaseLibrary({ cases, selectedId, onSelect }: CaseLibraryProps) {
       <div className="panel-heading library-heading">
         <div>
           <span className="section-index">01</span>
-          <h2>病例库</h2>
+          <h2>Case library</h2>
         </div>
         <span className="case-count">{String(cases.length).padStart(2, "0")}</span>
       </div>
       <label className="case-search">
         <Search size={15} />
-        <input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="搜索术式或病例编号" />
+        <input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Search procedure or case ID" />
       </label>
       <div className="case-list">
         {filteredCases.map((caseData, index) => {
@@ -46,17 +46,17 @@ export function CaseLibrary({ cases, selectedId, onSelect }: CaseLibraryProps) {
               <span className="case-subtitle">{caseData.subtitle}</span>
               <span className="case-card-meta">
                 <span>{formatTime(caseData.duration)}</span>
-                <span>{Object.keys(caseData.tracks).length} 通道</span>
+                <span>{Object.keys(caseData.tracks).length} channels</span>
                 <span>#{caseData.sourceCaseId}</span>
               </span>
             </button>
           )
         })}
-        {filteredCases.length === 0 && <p className="no-cases">没有匹配病例</p>}
+        {filteredCases.length === 0 && <p className="no-cases">No matching cases</p>}
       </div>
       <div className="dataset-stamp">
         <Database size={16} />
-        <div><strong>VitalDB v1.0.0</strong><span>公开匿名数据 · CC BY 4.0</span></div>
+        <div><strong>VitalDB v1.0.0</strong><span>Public de-identified data · CC BY 4.0</span></div>
       </div>
     </aside>
   )

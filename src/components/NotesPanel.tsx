@@ -14,9 +14,9 @@ interface NotesPanelProps {
 }
 
 const CATEGORY_LABELS = {
-  observation: "观察",
-  question: "讨论",
-  teaching: "教学点",
+  observation: "Observation",
+  question: "Discussion",
+  teaching: "Teaching point",
 }
 
 export function NotesPanel({
@@ -45,7 +45,7 @@ export function NotesPanel({
     }
     onChange([...notes, note])
     setText("")
-    onNotify("标注已保存在本机")
+    onNotify("Annotation saved locally")
   }
 
   const download = () => {
@@ -64,9 +64,9 @@ export function NotesPanel({
       const incoming = parseNotesFile(await file.text())
       const merged = new Map([...notes, ...incoming].map((note) => [note.id, note]))
       onChange([...merged.values()])
-      onNotify(`已导入 ${incoming.length} 条标注`)
+      onNotify(`Imported ${incoming.length} annotations`)
     } catch (error) {
-      onNotify(error instanceof Error ? error.message : "标注导入失败", "danger")
+      onNotify(error instanceof Error ? error.message : "Annotation import failed", "danger")
     } finally {
       if (importRef.current) importRef.current.value = ""
     }
@@ -77,7 +77,7 @@ export function NotesPanel({
       <div className="panel-heading">
         <div>
           <span className="section-index">03</span>
-          <h2>教学标注</h2>
+          <h2>Teaching notes</h2>
         </div>
         <span className="local-badge">LOCAL ONLY</span>
       </div>
@@ -98,11 +98,11 @@ export function NotesPanel({
         <textarea
           value={text}
           onChange={(event) => setText(event.target.value)}
-          placeholder="记录观察、讨论问题或教学要点……"
+          placeholder="Record an observation, discussion question, or teaching point..."
           rows={4}
         />
         <button className="add-note-button" onClick={addNote} disabled={!text.trim()}>
-          <Plus size={16} /> 固定到当前时间
+          <Plus size={16} /> Pin to current time
         </button>
       </div>
 
@@ -110,7 +110,7 @@ export function NotesPanel({
         {caseNotes.length === 0 ? (
           <div className="empty-notes">
             <span>NO ANNOTATIONS</span>
-            <p>播放到关键位置，在这里留下教学标记。</p>
+            <p>Replay to a meaningful moment, then leave a teaching marker here.</p>
           </div>
         ) : (
           caseNotes.map((note) => (
@@ -122,7 +122,7 @@ export function NotesPanel({
               <p>{note.text}</p>
               <button
                 className="icon-button delete-note"
-                aria-label="删除标注"
+                aria-label="Delete annotation"
                 onClick={() => onChange(notes.filter((candidate) => candidate.id !== note.id))}
               >
                 <Trash2 size={14} />
@@ -141,10 +141,10 @@ export function NotesPanel({
           onChange={(event) => void importFile(event.target.files?.[0])}
         />
         <button className="secondary-button" onClick={() => importRef.current?.click()}>
-          <FileUp size={15} /> 导入
+          <FileUp size={15} /> Import
         </button>
         <button className="secondary-button" onClick={download} disabled={!notes.length}>
-          <Download size={15} /> 导出全部
+          <Download size={15} /> Export all
         </button>
       </div>
     </aside>
