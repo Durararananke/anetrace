@@ -4,6 +4,6 @@ coverage/
 .DS_Store
 *.local
 *.log
+*.tsbuildinfo
 .idea/
 .vscode/
-
