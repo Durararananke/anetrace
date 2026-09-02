@@ -60,5 +60,3 @@ public/cases/cases.json         Generated static case bundle
 scripts/build_vitaldb_cases.py  Reproducible VitalDB data generator
 public/sw.js                    Basic offline cache
 ```
-
-Read [CONTRIBUTING.md](CONTRIBUTING.md) before contributing. Source code is available under the [MIT License](LICENSE).
